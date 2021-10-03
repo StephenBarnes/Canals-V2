@@ -1,0 +1,22 @@
+{
+  "result": {
+    "item": "canals:canal",
+	"data": 0,
+	"count": 6
+  },
+  "pattern": [
+    "CCC",
+	"SSS"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "S": {
+      "item": "minecraft:stonebrick",
+	  "data": 32767
+    },
+    "C": {
+      "item": "minecraft:clay",
+      "data": 0
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "canals:block/canal_x"
+    },
+    "axis=z": {
+      "model": "canals:block/canal_z"
+    }
+  }
+}
