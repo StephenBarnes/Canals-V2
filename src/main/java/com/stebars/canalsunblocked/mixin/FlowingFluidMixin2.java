@@ -270,6 +270,9 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 	protected FluidState getNewLiquid(IWorldReader world, BlockPos pos, BlockState state) {
 		int maxAmount = 0;
 		int adjacentSources = 0;
+		boolean flowFar = false;
+		if (world.getBlockState(pos.below()).getBlock().is(Blocks.STONE_BRICKS))
+			flowFar = true;
 
 		for(Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockpos = pos.relative(direction);
@@ -280,10 +283,14 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 					++adjacentSources;
 				}
 
-				int fineLevelThere = fluidstate.getValue(Util.FINE_LEVEL);
-				if (fluidstate.isSource()) fineLevelThere = Util.FINE_LEVEL_MAX;
-				Log.info("for getNewLiquid at ", pos, " we found fine level of ", fineLevelThere, " at ", blockpos);
-				maxAmount = Math.max(maxAmount, fineLevelThere);
+				if (flowFar) {
+					int fineLevelThere = fluidstate.getValue(Util.FINE_LEVEL);
+					if (fluidstate.isSource()) fineLevelThere = Util.FINE_LEVEL_MAX;
+					Log.info("for getNewLiquid at ", pos, " we found fine level of ", fineLevelThere, " at ", blockpos);
+					maxAmount = Math.max(maxAmount, fineLevelThere);
+				} else {
+					maxAmount = Math.max(maxAmount, fluidstate.getAmount());
+				}
 			}
 		}
 
@@ -306,7 +313,10 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 		} else {
 			int k = maxAmount - this.getDropOff(world);
 			Log.info(pos, " - has fluid adjacent with max amount ", maxAmount, " so minus dropoff ", this.getDropOff(world), "gives new fluid block with fineLevel ", k);
-			return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(false, k);
+			if (flowFar) {
+				return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(false, k);
+			} else
+				return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(k, false);
 		}
 	}
 
