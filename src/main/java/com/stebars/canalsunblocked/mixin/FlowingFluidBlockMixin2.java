@@ -105,7 +105,7 @@ public abstract class FlowingFluidBlockMixin2 extends Block {
 	public FluidState getFluidState(BlockState state) {
 		int level = state.getValue(LEVEL);
 		int fineLevel = state.getValue(Util.FINE_LEVEL);
-		Log.info("Getting fluid state; level is ", level, ", fine ", fineLevel);
+		//Log.info("Getting fluid state; level is ", level, ", fine ", fineLevel);
 		//if (!fluidStateCacheInitialized) initFluidStateCache();
 		if (!fineStateCacheInitialized) initFineStateCache();
 		int idx = Math.min(level, 8);
@@ -116,7 +116,7 @@ public abstract class FlowingFluidBlockMixin2 extends Block {
 			return this.fineStateCache.get(Util.FINE_LEVEL_MAX);
 		}
 		// works: return getFluid().getFlowing(8 - idx, false).setValue(Util.FINE_LEVEL, 80 - fineLevel);
-		return this.fineStateCache.get(80 - fineLevel);
+		return this.fineStateCache.get(Util.FINE_LEVEL_MAX - fineLevel);
 		//return this.stateCache.get(idx);
 	}
 	

@@ -7,7 +7,8 @@
     "FlowingFluidBlockMixin2",
     "FlowingFluidMixin2",
     "WaterFluidMixin2",
-    "WaterFluidFlowingMixin2"
+    "WaterFluidFlowingMixin2",
+    "FluidStateMixin2"
   ],
   "injectors": {
     "defaultRequire": 1
