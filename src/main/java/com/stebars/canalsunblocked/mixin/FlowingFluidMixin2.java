@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.Lists;
+import com.stebars.canalsunblocked.CanalsMod;
 import com.stebars.canalsunblocked.Util;
 
 import net.minecraft.block.AbstractBlock;
@@ -30,7 +31,10 @@ import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -55,6 +59,10 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 
 	@Shadow public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_FLOWING; // 1-8, not reversed
 	@Shadow public static final BooleanProperty FALLING = BlockStateProperties.FALLING;
+	
+	private static final ResourceLocation tagValidCanalBase = new ResourceLocation(CanalsMod.MOD_ID, "valid_canal_base");
+	private static final ResourceLocation tagValidCanalWall = new ResourceLocation(CanalsMod.MOD_ID, "valid_canal_wall");
+
 
 	/*@Inject(at = @At("HEAD"), method = "canConvertToSource", cancellable = true)
 	protected void canConvertToSource(CallbackInfoReturnable<Boolean> info) {
@@ -209,11 +217,11 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 			Log.info("it's a source, no level, returning 0.9");
 			fineLevel = Util.FINE_LEVEL_MAX; // For source blocks
 		} else Log.info("it's NOT a source, has level ", fluidState.getValue(LEVEL));
-		Log.info("fluidState.getOwnHeight called, fine level is ", fineLevel, " so returning height ", fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F));
+		Log.info("fluidState.getOwnHeight called, fine level is ", fineLevel, " so returning height ", 0.89 * fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F));
 		/*Log.info("state ", p_223407_1_, " has height ",
 				(float)fineLevel, " / ", (((float) Util.FINE_LEVEL_MAX) + 5F), " = ",
 				(float)fineLevel / (((float) Util.FINE_LEVEL_MAX) + 5F));*/
-		return fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F);
+		return 0.89F * (fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F));
 		// Note, needs to be tuned depending on LEVEL_MULTIPLIER, else water will seem to flow uphill from source blocks next to solid blocks.
 		// See constant 8/9 = 0.8888889F in vanilla code.
 	}
@@ -270,9 +278,7 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 	protected FluidState getNewLiquid(IWorldReader world, BlockPos pos, BlockState state) {
 		int maxAmount = 0;
 		int adjacentSources = 0;
-		boolean flowFar = false;
-		if (world.getBlockState(pos.below()).getBlock().is(Blocks.STONE_BRICKS))
-			flowFar = true;
+		boolean inCanal = posInCanal(world, pos);
 
 		for(Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockpos = pos.relative(direction);
@@ -283,7 +289,7 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 					++adjacentSources;
 				}
 
-				if (flowFar) {
+				if (inCanal) {
 					int fineLevelThere = fluidstate.getValue(Util.FINE_LEVEL);
 					if (fluidstate.isSource()) fineLevelThere = Util.FINE_LEVEL_MAX;
 					Log.info("for getNewLiquid at ", pos, " we found fine level of ", fineLevelThere, " at ", blockpos);
@@ -312,7 +318,7 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 			return this.getFlowing(8, true);
 		} else {
 			Log.info(pos, " - has fluid adjacent with max amount ", maxAmount, " so minus dropoff ", this.getDropOff(world), "gives new fluid block with fineLevel [blank]");
-			if (flowFar) {
+			if (inCanal) {
 				// Empty faster when flowing far
 				FluidState currentFluidState = state.getFluidState();
 				int currentFineLevel = currentFluidState.isEmpty() ? 0 : currentFluidState.getValue(Util.FINE_LEVEL);
@@ -325,6 +331,35 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 				return newLevel <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(newLevel, false);
 			}
 		}
+	}
+	
+	protected boolean posInCanal(IWorldReader world, BlockPos pos) {
+		if (!validCanalBaseBlock(world.getBlockState(pos.below()).getBlock()))
+			return false;
+		int validSideCount = 0;
+		for(Direction direction : Direction.Plane.HORIZONTAL) {
+			for (int i = 1; i <= 3; i++) {
+				BlockPos sidePos = pos.relative(direction, i);
+				BlockState sideState = world.getBlockState(sidePos);
+				Block sideBlock = sideState.getBlock();
+				if (validCanalSideBlock(sideBlock)) {
+					validSideCount++;
+					break;
+				} else if (!sideBlock.isAir(sideState, world, sidePos) && sideBlock.getFluidState(sideState).isEmpty())
+					return false;
+			}
+		}
+		return validSideCount >= 2;
+	}
+	
+	protected boolean validCanalBaseBlock(Block block) {
+		Log.info("block ", block.getName(), " is canal base: ", block.getTags().contains(tagValidCanalBase));
+		return block.getTags().contains(tagValidCanalBase);
+	}
+	
+	protected boolean validCanalSideBlock(Block block) {
+		Log.info("block ", block.getName(), " is canal wall: ", block.getTags().contains(tagValidCanalWall));
+		return block.getTags().contains(tagValidCanalWall);
 	}
 
 
