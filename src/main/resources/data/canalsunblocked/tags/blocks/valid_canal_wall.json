@@ -76,7 +76,6 @@
     "minecraft:red_terracotta",
     "minecraft:black_terracotta",
 
-
     "minecraft:glass",
     "minecraft:white_stained_glass",
     "minecraft:orange_stained_glass",
@@ -138,6 +137,35 @@
     "minecraft:sandstone",
     "minecraft:red_sandstone",
     "minecraft:cobblestone",
-    "minecraft:prismarine"
+    "minecraft:prismarine",
+    
+    "minecraft:stone_stairs",
+    "minecraft:granite_stairs",
+    "minecraft:polished_granite_stairs",
+    "minecraft:diorite_stairs",
+    "minecraft:polished_diorite_stairs",
+    "minecraft:andesite_stairs",
+    "minecraft:polished_andesite_stairs",
+    "minecraft:cobblestone_stairs",
+    "minecraft:mossy_cobblestone_stairs",
+    "minecraft:stone_brick_stairs",
+    "minecraft:mossy_stone_brick_stairs",
+    "minecraft:brick_stairs",
+    "minecraft:end_stone_brick_stairs",
+    "minecraft:nether_brick_stairs",
+    "minecraft:red_nether_brick_stairs",
+    "minecraft:sandstone_stairs",
+    "minecraft:smooth_sandstone_stairs",
+    "minecraft:red_sandstone_stairs",
+    "minecraft:smooth_red_sandstone_stairs",
+    "minecraft:quartz_stairs",
+    "minecraft:smooth_quartz_stairs",
+    "minecraft:purpur_stairs",
+    "minecraft:prismarine_stairs",
+    "minecraft:prismarine_brick_stairs",
+    "minecraft:dark_prismarine_stairs",
+    "minecraft:blackstone_stairs",
+    "minecraft:polished_blackstone_stairs",
+    "minecraft:polished_blackstone_brick_stairs"
   ]
 }
