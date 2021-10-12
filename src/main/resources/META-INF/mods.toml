@@ -3,25 +3,25 @@ loaderVersion="[36,)"
 license="Public domain"
 
 [[mods]]
-modId="canals"
+modId="canalsunblocked"
 version="v1.0"
-displayName="Canals"
+displayName="Canals Unblocked"
 #updateJSONURL=""
-displayURL="https://www.curseforge.com/minecraft/mc-mods/canals"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/canals-unblocked"
 #logoFile="logo.png"
 #credits="credits"
 authors="StephenBarnes"
 description='''
-Adds canals, through which water can flow indefinitely far from one source block.'''
+Makes water flow further through 1-block-wide canals.'''
 
-[[dependencies.canals]]
+[[dependencies.canalsunblocked]]
     modId="forge"
     mandatory=true
     versionRange="[36.2.0,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.canals]]
+[[dependencies.canalsunblocked]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.5,1.17)"
