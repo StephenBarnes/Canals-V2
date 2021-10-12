@@ -179,15 +179,22 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 
 
 
-	/*@Overwrite
-	public float getHeight(FluidState p_215662_1_, IBlockReader p_215662_2_, BlockPos p_215662_3_) {
-		return hasSameAbove(p_215662_1_, p_215662_2_, p_215662_3_) ? 1.0F : p_215662_1_.getOwnHeight();
-	}*/
 
-	@Overwrite
+	/*@Overwrite
 	public float getOwnHeight(FluidState p_223407_1_) {
 		Log.info("fluidState.getOwnHeight called, amount is ", (float)p_223407_1_.getAmount(), " so returning height ", (float)p_223407_1_.getAmount() / 9.0F);
 		return (float)p_223407_1_.getAmount() / 9.0F;
+	}*/
+	
+	@Overwrite
+	public float getOwnHeight(FluidState p_223407_1_) {
+		int fineLevel = p_223407_1_.getValue(Util.FINE_LEVEL);
+		if (fineLevel == 0) fineLevel = Util.FINE_LEVEL_MAX; // For source blocks
+		Log.info("fluidState.getOwnHeight called, amount is ", (float)p_223407_1_.getAmount(), " so returning height ", fineLevel / (((float) Util.FINE_LEVEL_MAX) + 5F));
+		/*Log.info("state ", p_223407_1_, " has height ",
+				(float)fineLevel, " / ", (((float) Util.FINE_LEVEL_MAX) + 5F), " = ",
+				(float)fineLevel / (((float) Util.FINE_LEVEL_MAX) + 5F));*/
+		return fineLevel / (((float) Util.FINE_LEVEL_MAX) + 5F);
 	}
 
 	/*@Overwrite
