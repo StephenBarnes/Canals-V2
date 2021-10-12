@@ -1,6 +1,0 @@
-{
-  "parent": "canals:block/canal_z",
-  "textures": {
-    "layer0": "canals:item/canal"
-  }
-}

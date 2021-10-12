@@ -3,25 +3,25 @@ loaderVersion="[36,)"
 license="Public domain"
 
 [[mods]]
-modId="canalsunblocked"
-version="v1.0"
-displayName="Canals Unblocked"
+modId="canals"
+version="v2.0"
+displayName="Canals"
 #updateJSONURL=""
-displayURL="https://www.curseforge.com/minecraft/mc-mods/canals-unblocked"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/canals"
 #logoFile="logo.png"
 #credits="credits"
 authors="StephenBarnes"
 description='''
-Makes water flow further through 1-block-wide canals.'''
+Let player construct canals to make fluids flow further.'''
 
-[[dependencies.canalsunblocked]]
+[[dependencies.canals]]
     modId="forge"
     mandatory=true
     versionRange="[36.2.0,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.canalsunblocked]]
+[[dependencies.canals]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.5,1.17)"

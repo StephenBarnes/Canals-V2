@@ -1,4 +1,4 @@
-package com.stebars.canalsunblocked;
+package com.stebars.canals;
 
 import net.minecraft.state.IntegerProperty;
 

@@ -1,1 +1,1 @@
-MixinConfigs: canalsunblocked.mixins.json
+MixinConfigs: canals.mixins.json

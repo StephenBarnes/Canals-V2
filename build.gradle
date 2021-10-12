@@ -15,9 +15,9 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
-group = 'com.stebars.canalsunblocked'
-archivesBaseName = 'canalsunblocked'
+version = '2.0'
+group = 'com.stebars.canals'
+archivesBaseName = 'canals'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users
 
@@ -143,16 +143,16 @@ dependencies {
 }
 
 mixin {
-    add sourceSets.main, "canalsunblocked.refmap.json"
+    add sourceSets.main, "canals.refmap.json"
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
-            "Specification-Title": "canalsunblocked",
+            "Specification-Title": "canals",
             "Specification-Vendor": "stebars",
-            "Specification-Version": "1", // We are version 1 of ourselves
+            "Specification-Version": "2",
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"stebars",

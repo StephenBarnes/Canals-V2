@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.stebars.canals.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "FlowingFluidBlockMixin",
+    "FlowingFluidMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "canals.refmap.json"
+}
