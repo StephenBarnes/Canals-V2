@@ -90,7 +90,7 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 		// TODO rewrite simpler, make it call function below
 	}
 
-	public FluidState getFlowing(boolean falling, int fineLevel) {
+	public FluidState getFlowingFine(boolean falling, int fineLevel) {
 		if (fineLevel <= 0) {
 			Log.info("called getFlowing with fineLevel <= 0, this should never happen, TODO remove those calls");
 			return Fluids.EMPTY.defaultFluidState();
@@ -311,12 +311,19 @@ public abstract class FlowingFluidMixin2 extends Fluid {
 			Log.info(pos, " - has fluid above, so setting to a flowing block with height 8");
 			return this.getFlowing(8, true);
 		} else {
-			int k = maxAmount - this.getDropOff(world);
-			Log.info(pos, " - has fluid adjacent with max amount ", maxAmount, " so minus dropoff ", this.getDropOff(world), "gives new fluid block with fineLevel ", k);
+			Log.info(pos, " - has fluid adjacent with max amount ", maxAmount, " so minus dropoff ", this.getDropOff(world), "gives new fluid block with fineLevel [blank]");
 			if (flowFar) {
-				return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(false, k);
-			} else
-				return k <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(k, false);
+				// Empty faster when flowing far
+				FluidState currentFluidState = state.getFluidState();
+				int currentFineLevel = currentFluidState.isEmpty() ? 0 : currentFluidState.getValue(Util.FINE_LEVEL);
+				int newFineLevel = (currentFineLevel > maxAmount) ? // drop faster if it's higher than all adjacent fluid levels
+						(currentFineLevel - this.getDropOff(world) * Util.DROP_MULTIPLIER)
+						: maxAmount - this.getDropOff(world);
+				return newFineLevel <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowingFine(false, newFineLevel);
+			} else {
+				int newLevel = maxAmount - this.getDropOff(world);
+				return newLevel <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(newLevel, false);
+			}
 		}
 	}
 
