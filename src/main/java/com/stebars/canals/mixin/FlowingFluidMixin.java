@@ -7,6 +7,9 @@ import java.util.Map.Entry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.stebars.canals.CanalsMod;
 import com.stebars.canals.Util;
@@ -40,10 +43,11 @@ public abstract class FlowingFluidMixin extends Fluid {
 	private static final ResourceLocation tagCanalBase = new ResourceLocation(CanalsMod.MOD_ID, "canal_base");
 	private static final ResourceLocation tagCanalWall = new ResourceLocation(CanalsMod.MOD_ID, "canal_wall");
 
-	@Overwrite
-	protected void createFluidStateDefinition(StateContainer.Builder<Fluid, FluidState> p_207184_1_) {
-		p_207184_1_.add(FALLING);
-		p_207184_1_.add(Util.FINE_LEVEL);
+	@Inject(method = "createFluidStateDefinition",
+			at = @At("TAIL"))
+	protected void createFluidStateDefinition(StateContainer.Builder<Fluid, FluidState> builder,
+			CallbackInfo ci) {
+		builder.add(Util.FLUID_FINE_LEVEL);
 	}
 	// We should be able to only add fine level to non-source blocks; but that would require modifying WaterFluid.Flowing, and LavaFluid.Flowing, and all modded fluids too
 	// So instead we just add fine level to source blocks as well, but don't use the field
@@ -56,7 +60,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 		return this.getFlowing().defaultFluidState()
 				.setValue(LEVEL, Integer.valueOf(level))
 				.setValue(FALLING, Boolean.valueOf(falling))
-				.setValue(Util.FINE_LEVEL, Integer.valueOf(Util.LEVEL_MULTIPLIER * level));
+				.setValue(Util.FLUID_FINE_LEVEL, Integer.valueOf(Util.LEVEL_MULTIPLIER * level));
 	}
 
 	public FluidState getFlowingFine(boolean falling, int fineLevel) {
@@ -70,7 +74,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 		return this.getFlowing().defaultFluidState()
 				.setValue(LEVEL, Integer.valueOf(level))
 				.setValue(FALLING, Boolean.valueOf(falling))
-				.setValue(Util.FINE_LEVEL, Integer.valueOf(fineLevel));
+				.setValue(Util.FLUID_FINE_LEVEL, Integer.valueOf(fineLevel));
 	}
 
 
@@ -124,9 +128,9 @@ public abstract class FlowingFluidMixin extends Fluid {
 	}
 
 	private BlockState makeLegacyBlock(FluidState fluidState) {
-		if (fluidState.hasProperty(Util.FINE_LEVEL)) {
+		if (fluidState.hasProperty(Util.FLUID_FINE_LEVEL)) {
 			BlockState result = fluidState.createLegacyBlock()
-					.setValue(Util.FINE_LEVEL, Util.FINE_LEVEL_MAX - fluidState.getValue(Util.FINE_LEVEL));
+					.setValue(Util.BLOCK_FINE_LEVEL, Util.FINE_LEVEL_MAX - fluidState.getValue(Util.FLUID_FINE_LEVEL));
 			return result;
 		}
 		else
@@ -147,7 +151,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 
 	@Overwrite
 	public float getOwnHeight(FluidState fluidState) {
-		int fineLevel = fluidState.getValue(Util.FINE_LEVEL);
+		int fineLevel = fluidState.getValue(Util.FLUID_FINE_LEVEL);
 		if (!fluidState.hasProperty(LEVEL)) // For source blocks - for some reason fluidState.isSource() always returns false here
 			fineLevel = Util.FINE_LEVEL_MAX;
 		return 0.89F * (fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F));
@@ -163,7 +167,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 	// Overwrite this so we continue spreading at level 1, fine level 15
 	@Overwrite
 	private void spreadToSides(IWorld p_207937_1_, BlockPos p_207937_2_, FluidState p_207937_3_, BlockState p_207937_4_) {
-		int newFineLevel = p_207937_3_.getValue(Util.FINE_LEVEL) - this.getDropOff(p_207937_1_);
+		int newFineLevel = p_207937_3_.getValue(Util.FLUID_FINE_LEVEL) - this.getDropOff(p_207937_1_);
 		if (p_207937_3_.getValue(FALLING))
 			newFineLevel = Util.FINE_LEVEL_MAX - 1;
 
@@ -208,7 +212,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 					++adjacentSources;
 
 				if (inCanal) {
-					int fineLevelThere = fluidstate.getValue(Util.FINE_LEVEL);
+					int fineLevelThere = fluidstate.getValue(Util.FLUID_FINE_LEVEL);
 					if (fluidstate.isSource()) fineLevelThere = Util.FINE_LEVEL_MAX;
 					maxAmount = Math.max(maxAmount, fineLevelThere);
 				} else {
@@ -233,7 +237,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 		else {
 			if (inCanal) {
 				FluidState currentFluidState = state.getFluidState();
-				int currentFineLevel = currentFluidState.isEmpty() ? 0 : currentFluidState.getValue(Util.FINE_LEVEL);
+				int currentFineLevel = currentFluidState.isEmpty() ? 0 : currentFluidState.getValue(Util.FLUID_FINE_LEVEL);
 				int newFineLevel = (currentFineLevel > maxAmount) ?
 						(currentFineLevel - this.getDropOff(world) * Util.DROP_MULTIPLIER) // drop faster if it's higher than all adjacent fluid levels
 						: maxAmount - this.getDropOff(world);

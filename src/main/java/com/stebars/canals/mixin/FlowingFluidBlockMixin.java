@@ -24,6 +24,8 @@ import net.minecraft.state.properties.BlockStateProperties;
 @Mixin(FlowingFluidBlock.class)
 public abstract class FlowingFluidBlockMixin extends Block {
 
+	@Shadow private FlowingFluid fluid;
+
 	public FlowingFluidBlockMixin(Properties p_i48440_1_) {
 		super(p_i48440_1_);
 		this.stateCache = null;
@@ -36,7 +38,7 @@ public abstract class FlowingFluidBlockMixin extends Block {
 			at = @At("TAIL"))
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_,
 			CallbackInfo ci) {
-		p_206840_1_.add(Util.FINE_LEVEL);
+		p_206840_1_.add(Util.BLOCK_FINE_LEVEL);
 	}
 
 	@Shadow private synchronized void initFluidStateCache() {
@@ -49,7 +51,7 @@ public abstract class FlowingFluidBlockMixin extends Block {
 	@Overwrite
 	public FluidState getFluidState(BlockState state) {
 		int level = state.getValue(LEVEL);
-		int fineLevel = state.getValue(Util.FINE_LEVEL);
+		int fineLevel = state.getValue(Util.BLOCK_FINE_LEVEL);
 		if (!fineStateCacheInitialized) initFineStateCache();
 		int idx = Math.min(level, 8);
 		if (idx == 0)
@@ -72,7 +74,7 @@ public abstract class FlowingFluidBlockMixin extends Block {
 			this.fineStateCache.add(getFluid().getSource(false));
 			for (int fineLevel = 1; fineLevel < Util.FINE_LEVEL_MAX; ++fineLevel) {
 				int level = Math.max(1, fineLevel / Util.LEVEL_MULTIPLIER);
-				this.fineStateCache.add(getFluid().getFlowing(level, false).setValue(Util.FINE_LEVEL, fineLevel));
+				this.fineStateCache.add(getFluid().getFlowing(level, false).setValue(Util.FLUID_FINE_LEVEL, fineLevel));
 			}
 			this.fineStateCache.add(getFluid().getFlowing(8, true));
 			fineStateCacheInitialized = true;
