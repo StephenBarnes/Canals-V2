@@ -37,8 +37,8 @@ public abstract class FlowingFluidMixin extends Fluid {
 	@Shadow public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_FLOWING; // 1-8, not reversed
 	@Shadow public static final BooleanProperty FALLING = BlockStateProperties.FALLING;
 
-	private static final ResourceLocation tagValidCanalBase = new ResourceLocation(CanalsMod.MOD_ID, "valid_canal_base");
-	private static final ResourceLocation tagValidCanalWall = new ResourceLocation(CanalsMod.MOD_ID, "valid_canal_wall");
+	private static final ResourceLocation tagCanalBase = new ResourceLocation(CanalsMod.MOD_ID, "canal_base");
+	private static final ResourceLocation tagCanalWall = new ResourceLocation(CanalsMod.MOD_ID, "canal_wall");
 
 	@Overwrite
 	protected void createFluidStateDefinition(StateContainer.Builder<Fluid, FluidState> p_207184_1_) {
@@ -266,11 +266,11 @@ public abstract class FlowingFluidMixin extends Fluid {
 	}
 
 	protected boolean validCanalBaseBlock(Block block) {
-		return block.getTags().contains(tagValidCanalBase);
+		return block.getTags().contains(tagCanalBase);
 	}
 
 	protected boolean validCanalSideBlock(Block block) {
-		return block.getTags().contains(tagValidCanalWall);
+		return block.getTags().contains(tagCanalWall);
 	}
 
 	// TODO use @Inject etc. instead of @Overwrite
