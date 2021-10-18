@@ -4,7 +4,7 @@ license="LGPL V3"
 
 [[mods]]
 modId="canals"
-version="v2.1"
+version="2.2"
 displayName="Canals"
 #updateJSONURL=""
 displayURL="https://www.curseforge.com/minecraft/mc-mods/canals"

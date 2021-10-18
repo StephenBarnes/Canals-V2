@@ -15,7 +15,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.5-2.1.0'
+version = '1.16.5-2.2.0'
 group = 'com.stebars.canals'
 archivesBaseName = 'canals'
 
@@ -160,7 +160,7 @@ jar {
             "MixinConfigs": "canals.mixins.json",
             "Specification-Title": "canals",
             "Specification-Vendor": "stebars",
-            "Specification-Version": "2.1",
+            "Specification-Version": "2.2",
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"stebars",
