@@ -51,16 +51,15 @@ public abstract class FlowingFluidBlockMixin extends Block {
 	@Overwrite
 	public FluidState getFluidState(BlockState state) {
 		int level = state.getValue(LEVEL);
-		int fineLevel = state.getValue(Util.BLOCK_FINE_LEVEL);
+		int totalLevel = Util.getTotalLevel(level, state.getValue(Util.BLOCK_FINE_LEVEL));
 		if (!fineStateCacheInitialized) initFineStateCache();
 		int idx = Math.min(level, 8);
 		if (idx == 0)
 			return this.fineStateCache.get(0);
 		if (idx == 8)
-			return this.fineStateCache.get(Util.FINE_LEVEL_MAX);
-		return this.fineStateCache.get(Util.FINE_LEVEL_MAX - fineLevel);
+			return this.fineStateCache.get(Util.TOTAL_LEVEL_MAX - Util.TOTAL_LEVEL_MIN + 1);
+		return this.fineStateCache.get(Util.TOTAL_LEVEL_MAX - totalLevel + 1); // there's a -Util.TOTAL_LEVEL_MIN on both sides
 	}
-
 
 	@Shadow private boolean fluidStateCacheInitialized;
 	private boolean fineStateCacheInitialized;
@@ -72,8 +71,9 @@ public abstract class FlowingFluidBlockMixin extends Block {
 		if (!fineStateCacheInitialized) {
 			this.fineStateCache = new ArrayList<FluidState>();
 			this.fineStateCache.add(getFluid().getSource(false));
-			for (int fineLevel = 1; fineLevel < Util.FINE_LEVEL_MAX; ++fineLevel) {
-				int level = Math.max(1, fineLevel / Util.LEVEL_MULTIPLIER);
+			for (int totalLevel = Util.TOTAL_LEVEL_MIN; totalLevel <= Util.TOTAL_LEVEL_MAX; ++totalLevel) {
+				int level = Util.totalToLevel(totalLevel);
+				int fineLevel = Util.totalToFine(totalLevel);
 				this.fineStateCache.add(getFluid().getFlowing(level, false).setValue(Util.FLUID_FINE_LEVEL, fineLevel));
 			}
 			this.fineStateCache.add(getFluid().getFlowing(8, true));

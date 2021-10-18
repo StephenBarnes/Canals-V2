@@ -60,13 +60,15 @@ public abstract class FlowingFluidMixin extends Fluid {
 		return this.getFlowing().defaultFluidState()
 				.setValue(LEVEL, Integer.valueOf(level))
 				.setValue(FALLING, Boolean.valueOf(falling))
-				.setValue(Util.FLUID_FINE_LEVEL, Integer.valueOf(Util.LEVEL_MULTIPLIER * level));
+				.setValue(Util.FLUID_FINE_LEVEL, Integer.valueOf(Util.FINE_LEVELS - 1));
 	}
 
-	public FluidState getFlowingFine(boolean falling, int fineLevel) {
-		if (fineLevel <= 0)
+	public FluidState getFlowingFine(boolean falling, int totalLevel) {
+		if (totalLevel < Util.TOTAL_LEVEL_MIN)
 			return Fluids.EMPTY.defaultFluidState();
-		int level = Math.max(1, fineLevel / Util.LEVEL_MULTIPLIER);
+		//if (totalLevel > Util.TOTAL_LEVEL_MAX) totalLevel = Util.TOTAL_LEVEL_MAX;
+		int level = Util.totalToLevel(totalLevel);
+		int fineLevel = Util.totalToFine(totalLevel);
 		return getFlowing(level, fineLevel, falling);
 	}
 
@@ -128,11 +130,9 @@ public abstract class FlowingFluidMixin extends Fluid {
 	}
 
 	private BlockState makeLegacyBlock(FluidState fluidState) {
-		if (fluidState.hasProperty(Util.FLUID_FINE_LEVEL)) {
-			BlockState result = fluidState.createLegacyBlock()
-					.setValue(Util.BLOCK_FINE_LEVEL, Util.FINE_LEVEL_MAX - fluidState.getValue(Util.FLUID_FINE_LEVEL));
-			return result;
-		}
+		if (fluidState.hasProperty(Util.FLUID_FINE_LEVEL))
+			return fluidState.createLegacyBlock()
+					.setValue(Util.BLOCK_FINE_LEVEL, Util.FINE_LEVELS - fluidState.getValue(Util.FLUID_FINE_LEVEL) - 1);
 		else
 			return fluidState.createLegacyBlock();
 	}
@@ -151,27 +151,25 @@ public abstract class FlowingFluidMixin extends Fluid {
 
 	@Overwrite
 	public float getOwnHeight(FluidState fluidState) {
-		int fineLevel = fluidState.getValue(Util.FLUID_FINE_LEVEL);
+		int totalLevel = Util.getTotalLevel(fluidState.getAmount(), fluidState.getValue(Util.FLUID_FINE_LEVEL));
 		if (!fluidState.hasProperty(LEVEL)) // For source blocks - for some reason fluidState.isSource() always returns false here
-			fineLevel = Util.FINE_LEVEL_MAX;
-		return 0.89F * (fineLevel / (((float) Util.FINE_LEVEL_MAX) + 1F));
-		// Note, needs to be tuned depending on LEVEL_MULTIPLIER, else water will seem to flow uphill from source blocks next to solid blocks.
-		// See constant 8/9 = 0.8888889F in vanilla code.
-	}
-
-	@Overwrite
-	protected static int getLegacyLevel(FluidState p_207205_0_) {
-		return p_207205_0_.isSource() ? 0 : 8 - Math.min(p_207205_0_.getAmount(), 8) + (p_207205_0_.getValue(FALLING) ? 8 : 0);
+			totalLevel = Util.TOTAL_LEVEL_MAX + 10;
+		totalLevel -= Util.TOTAL_LEVEL_MIN;
+		return 0.89F * (totalLevel / ((float) Util.TOTAL_LEVEL_MAX + 15 - Util.TOTAL_LEVEL_MIN));
+		// Note, needs to be tuned depending on FINE_LEVELS, else water will seem to flow uphill from source blocks next to solid blocks.
 	}
 
 	// Overwrite this so we continue spreading at level 1, fine level 15
 	@Overwrite
-	private void spreadToSides(IWorld p_207937_1_, BlockPos p_207937_2_, FluidState p_207937_3_, BlockState p_207937_4_) {
-		int newFineLevel = p_207937_3_.getValue(Util.FLUID_FINE_LEVEL) - this.getDropOff(p_207937_1_);
-		if (p_207937_3_.getValue(FALLING))
-			newFineLevel = Util.FINE_LEVEL_MAX - 1;
+	private void spreadToSides(IWorld p_207937_1_, BlockPos p_207937_2_, FluidState fluidState, BlockState p_207937_4_) {
+		int totalLevel = Util.getTotalLevel(fluidState.getAmount(), fluidState.getValue(Util.FLUID_FINE_LEVEL));
+		int newTotalLevel;
+		if (fluidState.getValue(FALLING))
+			newTotalLevel = Util.TOTAL_LEVEL_MAX - 1; // TODO remove the -1?
+		else
+			newTotalLevel = totalLevel - this.getDropOff(p_207937_1_);
 
-		if (newFineLevel > 0 || p_207937_3_.isSource()) {
+		if (newTotalLevel >= Util.TOTAL_LEVEL_MIN || fluidState.isSource()) {
 			Map<Direction, FluidState> map = this.getSpread(p_207937_1_, p_207937_2_, p_207937_4_);
 
 			for(Entry<Direction, FluidState> entry : map.entrySet()) {
@@ -185,7 +183,6 @@ public abstract class FlowingFluidMixin extends Fluid {
 			}
 		}
 	}
-
 
 	@Shadow
 	protected boolean canSpreadTo(IBlockReader p_205570_1_, BlockPos p_205570_2_, BlockState p_205570_3_, Direction p_205570_4_, BlockPos p_205570_5_, BlockState p_205570_6_, FluidState p_205570_7_, Fluid p_205570_8_) {
@@ -212,9 +209,9 @@ public abstract class FlowingFluidMixin extends Fluid {
 					++adjacentSources;
 
 				if (inCanal) {
-					int fineLevelThere = fluidstate.getValue(Util.FLUID_FINE_LEVEL);
-					if (fluidstate.isSource()) fineLevelThere = Util.FINE_LEVEL_MAX;
-					maxAmount = Math.max(maxAmount, fineLevelThere);
+					int totalLevelThere = Util.getTotalLevel(fluidstate.getAmount(), fluidstate.getValue(Util.FLUID_FINE_LEVEL));
+					if (fluidstate.isSource()) totalLevelThere = Util.TOTAL_LEVEL_MAX;
+					maxAmount = Math.max(maxAmount, totalLevelThere);
 				} else {
 					maxAmount = Math.max(maxAmount, fluidstate.getAmount());
 				}
@@ -237,11 +234,12 @@ public abstract class FlowingFluidMixin extends Fluid {
 		else {
 			if (inCanal) {
 				FluidState currentFluidState = state.getFluidState();
-				int currentFineLevel = currentFluidState.isEmpty() ? 0 : currentFluidState.getValue(Util.FLUID_FINE_LEVEL);
-				int newFineLevel = (currentFineLevel > maxAmount) ?
-						(currentFineLevel - this.getDropOff(world) * Util.DROP_MULTIPLIER) // drop faster if it's higher than all adjacent fluid levels
+				int currentTotalLevel = currentFluidState.isEmpty() ? 0 :
+					Util.getTotalLevel(currentFluidState.getAmount(), currentFluidState.getValue(Util.FLUID_FINE_LEVEL));
+				int newTotalLevel = (currentTotalLevel > maxAmount) ?
+						(currentTotalLevel - this.getDropOff(world) * Util.DROP_MULTIPLIER) // drop faster if it's higher than all adjacent fluid levels
 						: maxAmount - this.getDropOff(world);
-				return newFineLevel <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowingFine(false, newFineLevel);
+				return newTotalLevel < Util.TOTAL_LEVEL_MIN ? Fluids.EMPTY.defaultFluidState() : this.getFlowingFine(false, newTotalLevel);
 			} else {
 				int newLevel = maxAmount - this.getDropOff(world);
 				return newLevel <= 0 ? Fluids.EMPTY.defaultFluidState() : this.getFlowing(newLevel, false);
@@ -255,7 +253,7 @@ public abstract class FlowingFluidMixin extends Fluid {
 			return false;
 		int validSideCount = 0;
 		for(Direction direction : Direction.Plane.HORIZONTAL) {
-			for (int i = 1; i <= 3; i++) {
+			for (int i = 1; i <= Util.HORIZONTAL_SCAN_LENGTH; i++) {
 				BlockPos sidePos = pos.relative(direction, i);
 				BlockState sideState = world.getBlockState(sidePos);
 				Block sideBlock = sideState.getBlock();
