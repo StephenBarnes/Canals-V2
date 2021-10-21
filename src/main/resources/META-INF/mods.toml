@@ -4,7 +4,7 @@ license="LGPL V3"
 
 [[mods]]
 modId="canals"
-version="2.2"
+version="2.3"
 displayName="Canals"
 #updateJSONURL=""
 displayURL="https://www.curseforge.com/minecraft/mc-mods/canals"
@@ -13,6 +13,13 @@ displayURL="https://www.curseforge.com/minecraft/mc-mods/canals"
 authors="StephenBarnes"
 description='''
 Construct canals to make fluids flow further.'''
+
+[[dependencies.morewaterlogging]]
+    modId="statement"
+    mandatory=true
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"
 
 [[dependencies.canals]]
     modId="forge"
