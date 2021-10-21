@@ -14,7 +14,7 @@ authors="StephenBarnes"
 description='''
 Construct canals to make fluids flow further.'''
 
-[[dependencies.morewaterlogging]]
+[[dependencies.canals]]
     modId="statement"
     mandatory=true
     versionRange="*"
